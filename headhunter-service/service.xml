@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 7.3.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_7_3_0.dtd">
+
+<service-builder dependency-injector="ds" package-path="com.liferay.headhunter">
+	<namespace>HH</namespace>
+	<entity name="Vacancy" local-service="true" uuid="true" remote-service="false">
+
+
+		<!-- Headhunter fields -->
+
+		<column name="vacancyId" type="long" primary="true"/>
+		<column name="vacancyName" type="String"/>
+		<column name="employerName" type="String"/>
+		<column name="createdAt" type="String"/>
+		<column name="salaryFrom" type="int"/>
+		<column name="salaryTo" type="int"/>
+		<column name="salaryGross" type="boolean"/>
+		<column name="salaryCurrency" type="String"/>
+
+	</entity>
+</service-builder>

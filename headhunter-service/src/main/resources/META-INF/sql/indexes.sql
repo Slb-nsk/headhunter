@@ -1,0 +1,1 @@
+create index IX_B39AD692 on HH_Vacancy (uuid_[$COLUMN_LENGTH:75$]);

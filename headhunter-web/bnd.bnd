@@ -1,0 +1,4 @@
+Bundle-Name: headhunter-web
+Bundle-SymbolicName: com.liferay.headhunter
+Bundle-Version: 1.0.0
+Export-Package: com.liferay.headhunter.constants

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+<model-hints>
+	<model name="com.liferay.headhunter.model.Vacancy">
+		<field name="uuid" type="String" />
+		<field name="vacancyId" type="long" />
+		<field name="vacancyName" type="String" />
+		<field name="employerName" type="String" />
+		<field name="createdAt" type="String" />
+		<field name="salaryFrom" type="int" />
+		<field name="salaryTo" type="int" />
+		<field name="salaryGross" type="boolean" />
+		<field name="salaryCurrency" type="String" />
+	</model>
+</model-hints>

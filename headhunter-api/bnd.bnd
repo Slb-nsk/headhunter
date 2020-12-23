@@ -1,0 +1,10 @@
+Bundle-Name: headhunter-api
+Bundle-SymbolicName: com.liferay.headhunter.api
+Bundle-Version: 1.0.0
+Export-Package:\
+	com.liferay.headhunter.exception,\
+	com.liferay.headhunter.model,\
+	com.liferay.headhunter.service,\
+	com.liferay.headhunter.service.persistence
+-check: EXPORTS
+-includeresource: META-INF/service.xml=../headhunter-service/service.xml
