@@ -1,7 +1,12 @@
 <%@ include file="../init.jsp" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8"%>
 
-<p>Результаты поиска по параметрам: "регион" = "Новосибирск", "профессиональная область" = "Информационные технологии, интернет, телеком" </p>
+<%
+  String area = (String) renderRequest.getAttribute("area");
+  String specialization = (String) renderRequest.getAttribute("specialization");
+%>
+
+<p>Результаты поиска по параметрам: "регион" = <%= area %>, "профессиональная_область" = <%= specialization %> </p>
 
 <liferay-ui:search-container total="<%=VacancyLocalServiceUtil.getVacanciesCount()%>">
 <liferay-ui:search-container-results
@@ -34,3 +39,31 @@
 </liferay-ui:search-container>
 
 
+<p>Если хотите сделать поиск с другими параметрами - задайте эти параметры:</p>
+
+<portlet:actionURL name="additionalLoadData" var="additionalLoadDataURL">
+    <portlet:param name="mvcPath" value="/hh/displaydata.jsp" />
+</portlet:actionURL>
+
+<aui:form action="<%= additionalLoadDataURL %>" name="<portlet:namespace />fm">
+
+	<aui:fieldset column="true">
+
+		        <aui:select label="регион" name="area">
+                    <c:forEach var="a" items="${areas}">
+                       <aui:option value="${a.id}">${a.name}</aui:option>
+                    </c:forEach>
+                </aui:select>
+
+                <aui:select label="профессиональная область" name="specialization">
+                     <c:forEach var="s" items="${specializations}">
+                        <aui:option value="${s.id}">${s.name}</aui:option>
+                     </c:forEach>
+                </aui:select>
+
+	</aui:fieldset>
+
+<aui:button-row>
+		<aui:button type="submit" onClick="<%= additionalLoadDataURL %>" value="Загрузить новые данные"></aui:button>
+</aui:button-row>
+</aui:form>

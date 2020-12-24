@@ -6,7 +6,7 @@
 </portlet:actionURL>
 
 <aui:button-row>
-    <aui:button onClick="<%= initialLoadDataURL %>" value="Загрузить данные"></aui:button>
+    <aui:button onClick="<%= initialLoadDataURL %>" value="Загрузить данные по IT-вакансиям в Новосибирске"></aui:button>
 </aui:button-row>
 
 
