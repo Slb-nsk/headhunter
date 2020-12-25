@@ -17,6 +17,7 @@ import org.osgi.service.component.annotations.Reference;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 
@@ -39,8 +40,8 @@ import java.util.*;
         service = Portlet.class
 )
 public class HeadhunterPortlet extends MVCPortlet {
-    List<AreaWithId> areas = new ArrayList<AreaWithId>();
-    List<SpecializationWithId> specializations = new ArrayList<SpecializationWithId>();
+    List<AreaWithId> areas = new ArrayList<>();
+    List<SpecializationWithId> specializations = new ArrayList<>();
 
     @Override
     public void render(RenderRequest renderRequest, RenderResponse renderResponse)
@@ -60,34 +61,28 @@ public class HeadhunterPortlet extends MVCPortlet {
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.setRequestProperty("Content-Type", "application/json");
-        JsonReader reader = new JsonReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
-        try {
+        try (JsonReader reader = new JsonReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
             _readAreas(reader);
-        } finally {
-            reader.close();
         }
 
         url = new URL(specializationUrl);
         con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.setRequestProperty("Content-Type", "application/json");
-        reader = new JsonReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
-        try {
+        try (JsonReader reader = new JsonReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
             _readSpecializations(reader);
-        } finally {
-            reader.close();
         }
 
         actionResponse.getRenderParameters().setValue("area", "Новосибирск");
         actionResponse.getRenderParameters().setValue("specialization", "Информационные технологии, интернет, телеком");
-        _loadData(4,1);
+        _loadData(4, 1);
     }
 
     public void additionalLoadData(ActionRequest actionRequest, ActionResponse actionResponse) throws IOException {
         int area = ParamUtil.getInteger(actionRequest, "area");
         int specialization = ParamUtil.getInteger(actionRequest, "specialization");
 
-        _loadData(area,specialization);
+        _loadData(area, specialization);
 
         for (AreaWithId a : areas) {
             if (a.getId() == area) {
@@ -96,7 +91,9 @@ public class HeadhunterPortlet extends MVCPortlet {
         }
         for (SpecializationWithId s : specializations) {
             if (s.getId() == specialization) {
-                actionResponse.getRenderParameters().setValue("specialization", s.getName());}}
+                actionResponse.getRenderParameters().setValue("specialization", s.getName());
+            }
+        }
     }
 
     private void _readAreas(JsonReader reader) throws IOException {
@@ -114,14 +111,19 @@ public class HeadhunterPortlet extends MVCPortlet {
         reader.beginObject();
         while (reader.hasNext()) {
             String name = reader.nextName();
-            if (name.equals("id")) {
-                areaId = reader.nextInt();
-            } else if (name.equals("name")) {
-                areaName = reader.nextString();
-            } else if (name.equals("areas")) {
-                _readAreas(reader);
-            } else {
-                reader.skipValue();
+            switch (name) {
+                case ("id"):
+                    areaId = reader.nextInt();
+                    break;
+                case ("name"):
+                    areaName = reader.nextString();
+                    break;
+                case ("areas"):
+                    _readAreas(reader);
+                    break;
+                default:
+                    reader.skipValue();
+                    break;
             }
         }
         reader.endObject();
@@ -222,11 +224,8 @@ public class HeadhunterPortlet extends MVCPortlet {
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.setRequestProperty("Content-Type", "application/json");
-        JsonReader reader = new JsonReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
-        try {
+        try (JsonReader reader = new JsonReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
             _readCommonInfo(reader);
-        } finally {
-            reader.close();
         }
 
     }
@@ -236,7 +235,7 @@ public class HeadhunterPortlet extends MVCPortlet {
         while (reader.hasNext()) {
             String name = reader.nextName();
             if (name.equals("items")) {
-                _readVacansiesList(reader);
+                _readVacanciesList(reader);
             } else {
                 reader.skipValue();
             }
@@ -244,15 +243,15 @@ public class HeadhunterPortlet extends MVCPortlet {
         reader.endObject();
     }
 
-    private void _readVacansiesList(JsonReader reader) throws IOException {
+    private void _readVacanciesList(JsonReader reader) throws IOException {
         reader.beginArray();
         while (reader.hasNext()) {
-            _readVacansy(reader);
+            _readVacancy(reader);
         }
         reader.endArray();
     }
 
-    private void _readVacansy(JsonReader reader) throws IOException {
+    private void _readVacancy(JsonReader reader) throws IOException {
         long vacancyId = -1;
         String vacancyName = null;
         String employerName = null;
@@ -262,35 +261,42 @@ public class HeadhunterPortlet extends MVCPortlet {
         reader.beginObject();
         while (reader.hasNext()) {
             String name = reader.nextName();
-            if (name.equals("id")) {
-                vacancyId = reader.nextLong();
-            } else if (name.equals("name")) {
-                vacancyName = reader.nextString();
-            } else if (name.equals("employer")) {
-                employerName = _readEmployer(reader);
-            } else if (name.equals("createdAt")) {
-                createdAt = reader.nextString();
-            } else if (name.equals("salary")) {
-                if (reader.peek() == JsonToken.NULL) {
-                    reader.nextNull();
-                } else {
-                    salary = _readSalary(reader);
-                }
-            } else {
-                reader.skipValue();
+            switch (name) {
+                case ("id"):
+                    vacancyId = reader.nextLong();
+                    break;
+                case ("name"):
+                    vacancyName = reader.nextString();
+                    break;
+                case ("employer"):
+                    employerName = _readEmployer(reader);
+                    break;
+                case ("createdAt"):
+                    createdAt = reader.nextString();
+                    break;
+                case ("salary"):
+                    if (reader.peek() == JsonToken.NULL) {
+                        reader.nextNull();
+                    } else {
+                        salary = _readSalary(reader);
+                    }
+                    break;
+                default:
+                    reader.skipValue();
+                    break;
             }
         }
         reader.endObject();
         if (vacancyId > -1) {
-            Vacancy newVacansy = _vacancyLocalService.createVacancy(vacancyId);
-            newVacansy.setVacancyName(vacancyName);
-            newVacansy.setEmployerName(employerName);
-            newVacansy.setCreatedAt(createdAt);
-            newVacansy.setSalaryFrom(salary.getSalaryFrom());
-            newVacansy.setSalaryTo(salary.getSalaryTo());
-            newVacansy.setSalaryCurrency(salary.getSalaryCurrency());
-            newVacansy.setSalaryGross(salary.isSalaryGross());
-            _vacancyLocalService.addVacancy(newVacansy);
+            Vacancy newVacancy = _vacancyLocalService.createVacancy(vacancyId);
+            newVacancy.setVacancyName(vacancyName);
+            newVacancy.setEmployerName(employerName);
+            newVacancy.setCreatedAt(createdAt);
+            newVacancy.setSalaryFrom(salary.getSalaryFrom());
+            newVacancy.setSalaryTo(salary.getSalaryTo());
+            newVacancy.setSalaryCurrency(salary.getSalaryCurrency());
+            newVacancy.setSalaryGross(salary.isSalaryGross());
+            _vacancyLocalService.addVacancy(newVacancy);
         }
 
     }
@@ -304,36 +310,42 @@ public class HeadhunterPortlet extends MVCPortlet {
         reader.beginObject();
         while (reader.hasNext()) {
             String name = reader.nextName();
-            if (name.equals("from")) {
-                if (reader.peek() == JsonToken.NULL) {
-                    reader.nextNull();
-                    salaryFrom = 0;
-                } else {
-                    salaryFrom = reader.nextInt();
-                }
-            } else if (name.equals("to")) {
-                if (reader.peek() == JsonToken.NULL) {
-                    reader.nextNull();
-                    salaryTo = 0;
-                } else {
-                    salaryTo = reader.nextInt();
-                }
-            } else if (name.equals("currency")) {
-                if (reader.peek() == JsonToken.NULL) {
-                    reader.nextNull();
-                    salaryCurrency = "";
-                } else {
-                    salaryCurrency = reader.nextString();
-                }
-            } else if (name.equals("gross")) {
-                if (reader.peek() == JsonToken.NULL) {
-                    reader.nextNull();
-                    salaryGross = false;
-                } else {
-                    salaryGross = reader.nextBoolean();
-                }
-            } else {
-                reader.skipValue();
+            switch (name) {
+                case ("from"):
+                    if (reader.peek() == JsonToken.NULL) {
+                        reader.nextNull();
+                        salaryFrom = 0;
+                    } else {
+                        salaryFrom = reader.nextInt();
+                    }
+                    break;
+                case ("to"):
+                    if (reader.peek() == JsonToken.NULL) {
+                        reader.nextNull();
+                        salaryTo = 0;
+                    } else {
+                        salaryTo = reader.nextInt();
+                    }
+                    break;
+                case ("currency"):
+                    if (reader.peek() == JsonToken.NULL) {
+                        reader.nextNull();
+                        salaryCurrency = "";
+                    } else {
+                        salaryCurrency = reader.nextString();
+                    }
+                    break;
+                case ("gross"):
+                    if (reader.peek() == JsonToken.NULL) {
+                        reader.nextNull();
+                        salaryGross = false;
+                    } else {
+                        salaryGross = reader.nextBoolean();
+                    }
+                    break;
+                default:
+                    reader.skipValue();
+                    break;
             }
         }
         reader.endObject();
