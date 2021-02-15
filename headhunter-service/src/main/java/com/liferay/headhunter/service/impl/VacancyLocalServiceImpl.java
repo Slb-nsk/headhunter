@@ -59,4 +59,5 @@ public class VacancyLocalServiceImpl extends VacancyLocalServiceBaseImpl {
 
     @Reference
     private VacancyPersistence _vacancyPersistence;
+
 }

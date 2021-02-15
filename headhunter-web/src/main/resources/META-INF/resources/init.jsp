@@ -10,6 +10,11 @@ taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %>
 <%@ page import="com.liferay.headhunter.service.VacancyLocalServiceUtil" %>
 <%@ page import="com.liferay.headhunter.model.Vacancy" %>
 
+<%@ page import="com.liferay.portal.kernel.util.ParamUtil" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.List" %>
+
+
 <liferay-theme:defineObjects />
 
 <portlet:defineObjects />

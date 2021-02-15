@@ -46,14 +46,40 @@ public class HeadhunterPortlet extends MVCPortlet {
     @Override
     public void render(RenderRequest renderRequest, RenderResponse renderResponse)
             throws IOException, PortletException {
-        renderRequest.setAttribute("area", ParamUtil.getString(renderRequest, "area"));
-        renderRequest.setAttribute("specialization", ParamUtil.getString(renderRequest, "specialization"));
+        if ("".equals(ParamUtil.getString(renderRequest, "area"))) {
+            _initialLoadData();
+            renderRequest.setAttribute("area", "Новосибирск");
+            renderRequest.setAttribute("specialization", "Информационные технологии, интернет, телеком");
+        } else {
+            int area = ParamUtil.getInteger(renderRequest, "area");
+            int specialization = ParamUtil.getInteger(renderRequest, "specialization");
+            for (AreaWithId a : areas) {
+                if (a.getId() == area) {
+                    renderRequest.setAttribute("area", a.getName());
+                }
+            }
+            for (SpecializationWithId s : specializations) {
+                if (s.getId() == specialization) {
+                    renderRequest.setAttribute("specialization", s.getName());
+                }
+            }
+
+        }
         renderRequest.setAttribute("areas", areas);
         renderRequest.setAttribute("specializations", specializations);
         super.render(renderRequest, renderResponse);
     }
 
-    public void initialLoadData(ActionRequest actionRequest, ActionResponse actionResponse) throws IOException {
+    public void additionalLoadData(ActionRequest actionRequest, ActionResponse actionResponse) throws IOException {
+        int area = ParamUtil.getInteger(actionRequest, "area");
+        int specialization = ParamUtil.getInteger(actionRequest, "specialization");
+
+        _loadData(area, specialization);
+
+    }
+
+
+    private void _initialLoadData() throws IOException {
         String areaUrl = "https://api.hh.ru/areas";
         String specializationUrl = "https://api.hh.ru/specializations";
 
@@ -73,28 +99,9 @@ public class HeadhunterPortlet extends MVCPortlet {
             _readSpecializations(reader);
         }
 
-        actionResponse.getRenderParameters().setValue("area", "Новосибирск");
-        actionResponse.getRenderParameters().setValue("specialization", "Информационные технологии, интернет, телеком");
         _loadData(4, 1);
     }
 
-    public void additionalLoadData(ActionRequest actionRequest, ActionResponse actionResponse) throws IOException {
-        int area = ParamUtil.getInteger(actionRequest, "area");
-        int specialization = ParamUtil.getInteger(actionRequest, "specialization");
-
-        _loadData(area, specialization);
-
-        for (AreaWithId a : areas) {
-            if (a.getId() == area) {
-                actionResponse.getRenderParameters().setValue("area", a.getName());
-            }
-        }
-        for (SpecializationWithId s : specializations) {
-            if (s.getId() == specialization) {
-                actionResponse.getRenderParameters().setValue("specialization", s.getName());
-            }
-        }
-    }
 
     private void _readAreas(JsonReader reader) throws IOException {
         reader.beginArray();
